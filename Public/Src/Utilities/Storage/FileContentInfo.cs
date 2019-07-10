@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics.ContractsLight;
 using System.Runtime.InteropServices;
+using System.Threading;
 using BuildXL.Cache.ContentStore.Hashing;
 using BuildXL.Native.IO;
 using BuildXL.Utilities;
@@ -32,6 +33,8 @@ namespace BuildXL.Storage
         /// Content hash, contingent upon the <see cref="Native.IO.Usn"/> matching.
         /// </summary>
         public readonly ContentHash Hash;
+
+        private static int s_numLoggedMessages = 0;
 
         /// <summary>
         /// Creates a <see cref="FileContentInfo"/> with real USN version information.
@@ -88,7 +91,16 @@ namespace BuildXL.Storage
                     return null;
                 }
 
-                return (PathExistence) (UnknownLength - m_length);
+                // if we are about to overflow, log some data and do the cast in an unchecked context
+                if (m_length == 0 && Interlocked.Increment(ref s_numLoggedMessages) <= 5)
+                {
+                    BuildXL.Tracing.Logger.Log.UnexpectedCondition(BuildXL.Utilities.Tracing.Events.StaticContext, $"[FileContentInfo overflow] - [{Render()}] ");
+                }
+
+                unchecked
+                {
+                    return (PathExistence)(UnknownLength - m_length);
+                }
             }
         }
 
