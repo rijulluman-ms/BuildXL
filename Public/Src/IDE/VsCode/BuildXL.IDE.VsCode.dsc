@@ -9,6 +9,7 @@ import * as DetoursServices from "BuildXL.Sandbox.Windows";
 import * as Branding from "BuildXL.Branding";
 import * as VSIntegration from "BuildXL.Ide.VsIntegration";
 import {Node, Npm} from "Sdk.NodeJs";
+import * as TypeScriptCompiler from "Sdk.TypeScript";
 
 namespace LanguageService.Server {
 
@@ -58,7 +59,7 @@ namespace LanguageService.Server {
 
         const copyOfSourceFolder = copyDirectory(d`client`, Context.getNewOutputDirectory(`ClientTemp`));
         const nodeModulesPath = Npm.installFromPackageJson(copyOfSourceFolder).nodeModules;
-        //const outPath = Npm.runCompile(copyOfSourceFolder);
+        const outPath = TypeScriptCompiler.tscCompileToJs(copyOfSourceFolder);
 
         // Debug.writeLine("nodeModulesPath: " + nodeModulesPath.getContent().length);
 

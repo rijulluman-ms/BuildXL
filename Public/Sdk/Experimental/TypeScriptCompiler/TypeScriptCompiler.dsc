@@ -58,6 +58,32 @@ export function compile(args: Arguments): Result {
     };
 }
 
+@@public
+export function tscCompileToJs(workingStaticDirectory : StaticDirectory) : OpaqueDirectory {
+    const workingDirectory = workingStaticDirectory.root;
+    const nodeModulesPath = d`${workingDirectory}/node_modules`;
+    
+    const outPath = d`${workingDirectory}/out`;
+    const arguments: Argument[] = [
+        Cmd.argument("-p"),
+        Cmd.argument("./"),
+        Cmd.option("--target", "ES6")
+
+    ];
+
+    const result = Transformer.execute({
+        tool: tool,
+        arguments: arguments,
+        workingDirectory: workingDirectory,
+        dependencies: [workingStaticDirectory].filter(x => x !== undefined),
+        outputs: [
+            {directory: outPath, kind: "shared"}
+        ],
+    });
+
+    return result.getOutputDirectory(outPath);
+}
+
 /**
  *  Input arguments for the TypeScript compiler
  */
@@ -84,6 +110,8 @@ export interface Arguments extends Transformer.RunnerArguments {
     // Specifies a list of extra dependencies. This corresponds to the /// reference  path='file' references
     tripleSlashReferences?: File[];
 }
+
+
 
 /**
  *  ECMAScript target version.
