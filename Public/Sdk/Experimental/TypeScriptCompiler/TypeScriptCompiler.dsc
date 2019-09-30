@@ -66,9 +66,7 @@ export function tscCompileToJs(workingStaticDirectory : StaticDirectory) : Opaqu
     const outPath = d`${workingDirectory}/out`;
     const arguments: Argument[] = [
         Cmd.argument("-p"),
-        Cmd.argument("./"),
-        Cmd.option("--target", "ES6")
-
+        Cmd.argument("./")
     ];
 
     const result = Transformer.execute({
